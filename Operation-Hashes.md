@@ -159,3 +159,4 @@ If you have a hash and operation name that is not included, please feel free to 
 | `FFZ_EmoteMenu_SubStatus`  | `cca64347da920b6adf4e8ed35fba4b556725508b6190cafe0bd1554c8618eb81`  |
 | `ChatSettings_SelectGlobalBadge`  | `5e1b7f0ba771ca8eb81c0fcd5b8f4ff559ec2dc71cc9256e04ec2665049fc4e5`  |
 | `VideoPlayer_VODSeekbarPreviewVideo`  | `988844d55fb7369e30832ec236b7a7c96bb0d53617e2f55ebb1030008336120f`  |
+| `ChannelVideoCore`  | `ce114698319f9fa4a1e375ab0dfb65304c9db244ef440bf530b1414d79e7e9f2`  |
