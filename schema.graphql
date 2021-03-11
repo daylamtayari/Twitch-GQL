@@ -707,6 +707,8 @@ input AdRequestClientContext {
   isUsingExternalPlayback: Boolean!
   # App that the client is using.
   clientApp: String
+  # Version of the app.
+  appVersion: String
 }
 
 # The type of content playing when the ad was requested.
@@ -753,8 +755,6 @@ input AdRequestPlayerContext {
   nauthToken: String!
   # The ID for the current video session.
   videoSessionID: ID
-  # Version of the app.
-  appVersion: String
   # PlayerSizeMode of the incoming request.
   playerSizeMode: String
 }
@@ -1278,6 +1278,8 @@ type AutoModContent {
   text: String!
   # canPass is the result whether the text passed automod enforcement.
   canPass: Boolean!
+  # id is the ID generated for the test message (used for tracking).
+  id: ID!
   # error is the error when querying automod content.
   error: AutoModContentError
 }
@@ -2640,97 +2642,6 @@ type BrandPortalSettings {
   canAccessAllGames: Boolean!
   # This determines whether or not a company can access the Brand Portal.
   isEnabled: Boolean!
-}
-
-# Brand Safety data relating solely to a given category.
-type BrandSafetyCategoryProperties {
-  # The ESRB rating of the game being played.
-  gameEsrbRating: String
-  # Keywords describing the content of a game by the ESRB.
-  gameEsrbContentDescription: String
-}
-
-# A simple key/value object to hold custom parameters to forward to VAES.
-type BrandSafetyCustomParams {
-  # The key expected by VAES.
-  key: String!
-  # The value to pass alongside the key.
-  value: String!
-}
-
-# BrandSafetyData is an object that contains information about the brand suitability of a channel at a moment in time.
-# Data in this object will be passed to VAES in ad requests.
-type BrandSafetyData {
-  # A number representing the combined brand suitability of a channel.
-  brandSafetyScore: Int
-  # A general categorical rating of the channel based only on the mature flag and the game being played.
-  contentRating: String
-  # Brand Safety data relating solely to a given channel.
-  streamerProperties: BrandSafetyStreamerProperties
-  # Brand Safety data relating solely to a given category.
-  categoryProperties: BrandSafetyCategoryProperties
-  # A rating of this streamer's chat's brand suitability.
-  chatSensitiveContent: String
-  # A flag set by the streamer to indicate the channel is for mature audiences.
-  isStreamerMature: Boolean
-  # Extra key/value pairs to forward to VAES with an ad request.
-  customParams: [BrandSafetyCustomParams!]
-  # Potential error message returned from Brand Safety Service.
-  error: BrandSafetyError
-}
-
-# Input to BrandSafetyData query.
-input BrandSafetyDataInput {
-  # The ID of the channel to get data on.
-  channelID: ID!
-  # The name of the channel to get data on.
-  channelName: String!
-  # The ID of the category being streamed.
-  categoryID: ID!
-  # The name of the category being streamed.
-  categoryName: String!
-  # The source of this call. "twilight"/"android"/"ios"/"fring"/etc.
-  source: String!
-  # Version of the client. For non-mobile, set to "1".
-  version: String!
-  # Mature flag for a channel, manually set/unset by streamer.
-  isStreamerMature: Boolean!
-}
-
-# Potential error message returned from Brand Safety Service.
-type BrandSafetyError {
-  # Error code outlining the issue.
-  code: BrandSafetyErrorCode!
-}
-
-# Error code outlining the issue.
-enum BrandSafetyErrorCode {
-  # An unexpected error occurred within the Brand Safety Service.
-  INTERNAL_SERVER_ERROR
-  # One or more of the provided arguments are invalid.
-  INVALID_ARGUMENT
-}
-
-# Brand Safety data relating solely to a given channel.
-type BrandSafetyStreamerProperties {
-  # A rating of this streamer performed by a Twitch-affiliated reviewer.
-  streamerManualRating: String
-  # Keyword descriptions of this stream's content performed by a Twitch-affiliated reviewer.
-  streamerManualDescription: String
-  # The current state of this streamer's relationship with Twitch.
-  streamerGoodStanding: String
-  # If this streamer has been suspended, a general reason why.
-  streamerSuspensionReason: String
-  # If this streamer is a partner.
-  isStreamerPartner: Boolean
-  # If this streamer is 18 years old or older.
-  isStreamer18: Boolean
-  # If this streamer is 21 years old or older.
-  isStreamer21: Boolean
-  # If this streamer has automod enabled on their chat.
-  isStreamerAutomodEnabled: Boolean
-  # How sensitive automod is set to be while moderating chat.
-  streamerAutomodLevel: String
 }
 
 # A historical representation of a live stream.
@@ -12018,6 +11929,14 @@ type EmoteBitsBadgeTierSummarySelfEdge {
   numberOfBitsUntilUnlock: Int!
 }
 
+# The possible emote group asset types.
+enum EmoteGroupAssetType {
+  # STATIC type groups only contain static emotes.
+  STATIC
+  # ANIMATED type groups only contain animated emotes.
+  ANIMATED
+}
+
 # The ID, Size and AssetType of a previously uploaded emote.
 input EmoteImageAssetInput {
   # The asset type of the image.
@@ -12103,6 +12022,8 @@ type EmoteSet {
   # The channel associated with the emote set. Nil for emote sets not associated
   # with an owner (prime, fuel, rewards, etc.).
   owner: User
+  # The asset type of the emotes within the emote group.
+  assetType: EmoteGroupAssetType
 }
 
 # Deprecated: Domains that emotes belong to.
@@ -20847,9 +20768,6 @@ type Query {
   badges: [Badge]
   # Gets a list of Bits offers for a logged out user, for use on the Bits landing page.
   bitsOffers: [BitsOffer!]
-  # Grabs the Brand Safety Score of a channel as well as relevant data used to calculate it.
-  # Also returns custom parameters about this channel to forward to VAES for ad targetting purposes.
-  brandSafetyData(input: BrandSafetyDataInput!): BrandSafetyData
   # Returns a challenge by its ID.
   challenge(id: ID!): ChannelChallenge
   # Get a list of the most recent changelog items.
@@ -27326,9 +27244,15 @@ type SubscriptionProduct {
   animatedEmoteLimit: Int
   # The emote modifiers associated with the product.
   emoteModifiers: [EmoteModifier!]
-  # The identifier of an EmoteSet that a user gains access to use on Twitch,
+  # The identifier of the static EmoteSet that a user gains access to use on Twitch,
   # when they purchase this product.
   emoteSetID: ID
+    @deprecated(
+      reason: "Products can have more than one emote set now so use emoteGroups instead."
+    )
+  # The emote groups that the user gains access to use on Twitch when they purchase this product.
+  # When using the ALL filter the data is uncached and should only be used on the creator dashboard.
+  emoteGroups(state: EmoteStateFilter = ACTIVE): [EmoteSet!]
   # A list of Emotes the user gains access to use on Twitch when they purchase
   # this product.
   emotes(state: EmoteStateFilter = ACTIVE): [Emote]
