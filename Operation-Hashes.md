@@ -162,3 +162,5 @@ If you have a hash and operation name that is not included, please feel free to 
 | `ChatSettings_SelectGlobalBadge`  | `5e1b7f0ba771ca8eb81c0fcd5b8f4ff559ec2dc71cc9256e04ec2665049fc4e5`  |
 | `VideoPlayer_VODSeekbarPreviewVideo`  | `988844d55fb7369e30832ec236b7a7c96bb0d53617e2f55ebb1030008336120f`  |
 | `ChannelVideoCore`  | `ce114698319f9fa4a1e375ab0dfb65304c9db244ef440bf530b1414d79e7e9f2`  |
+| `SearchResultsPage_SearchResults`  | `ee977ac21b324669b4c109be49ed3032227e8850bea18503d0ced68e8156c2a5`  |
+| `BrowsePage_AllDirectories`  | `78957de9388098820e222c88ec14e85aaf6cf844adf44c8319c545c75fd63203`  |
