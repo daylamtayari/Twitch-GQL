@@ -181,6 +181,7 @@
     "CreditChargeModel": "CreditChargeModel",
     "CreditType": "CreditType",
     "ExternalChargeModel": "ExternalChargeModel",
+    "ExternalChargeModelSelfEdge": "ExternalChargeModelSelfEdge",
     "InternalChargeModel": "InternalChargeModel",
     "ChargeModelPlan": "ChargeModelPlan",
     "ChargeModelPlanInterval": "ChargeModelPlanInterval",

@@ -13240,10 +13240,22 @@ type ExtensionZipUploadResponse {
 
 # ExternalChargeModel defines a 3P managed SKU for a given offer.
 type ExternalChargeModel {
+  # Externally managed default/static SKU identifier. This is specifically for
+  # discovery and preview flows. Use `self -> checkoutSKU` for purchase flows.
+  previewSKU: String!
   # The provider for this externally managed SKU.
   provider: String!
-  # Externally managed SKU identifier.
-  sku: String!
+  # Externally managed default/static SKU identifier. For mobile checkouts, use
+  # `self` for dynamically vended SKU for the user.
+  sku: String! @deprecated(reason: "Use 'previewSKU' instead")
+  # The authenticated user's relationship with the external charge model.
+  self: ExternalChargeModelSelfEdge
+}
+
+# The authenticated user's relationship with the internal charge model.
+type ExternalChargeModelSelfEdge {
+  # The final checkout SKU of this offer available for the authenticated user.
+  checkoutSKU: String!
 }
 
 # FeaturedContentSections contain the a set of FeaturedItems that should be shown
@@ -34389,6 +34401,8 @@ type WatchPartyItem {
   type: WatchPartyItemType!
   # Publication year.
   yearPublished: Int
+  # Whether the content has parental control restrictions enabled.
+  isParentalControlRestricted: Boolean
 }
 
 # Watch party items, returned in a query.
