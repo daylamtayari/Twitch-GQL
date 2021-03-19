@@ -677,8 +677,6 @@ type AdProperties {
   hasVodAdsEnabled: Boolean
   # If multiplayer ads are enabled for subscribers on this channel.
   isMultiplayerAdsForSubsEnabled: Boolean
-  # A bool that represents a streamer's eligibility to run a picture by picture ad.
-  isPictureByPictureAdEligible: Boolean
   # Maximum length for an ad break on this channel.
   maxAdBreakLength: Int
   # Current multiplayer ad offers on the channel.
@@ -7775,10 +7773,19 @@ type CreateDropCampaignPayload {
 enum CreateDropImageUploadURLErrorCode {
   # The user does not have permissions to create this type of image for this service.
   USER_UNAUTHORIZED
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
   # There was an issue calling a dependency of this call.
   SERVICE_DEPENDENCY_FAILURE
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
   # An issue not matching any other specific error code.
   UNKNOWN
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
 }
 
 # Information needed to generate a URL to upload a drop image to.
@@ -7799,10 +7806,19 @@ input CreateDropImageUploadURLInput {
 type CreateDropImageUploadURLPayload {
   # Error (if any) from trying to create the upload URL.
   error: CreateDropImageUploadURLErrorCode
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
   # Unique identifier for the generated URL.
   uploadID: ID
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
   # The actual URL to be used by the client to upload the image.
   url: String
+    @deprecated(
+      reason: "Drops 1.0 is deprecated, use Drops 2.0/DropImageUpload instead."
+    )
 }
 
 # CreateExtensionClientError is an error associated with the createExtensionClient mutation.
@@ -20066,10 +20082,12 @@ enum PresignDevInsightsReportURLDomain {
 input PresignDevInsightsReportURLInput {
   # Domain of report, for a GAME or EXTENSION or DROP.
   domain: PresignDevInsightsReportURLDomain!
-  # Game ID or Extension ID or Drops Campaign ID/Reward ID.
+  # Resource ID. Depending on domain,it is the GameID or ExtensionID or DropsCampaignID
   id: ID!
   # Type of report, default is OVERVIEW_V2.
   type: PresignDevInsightsReportURLReportType
+  # Organization ID where the report is being requested. This may be empty, for example for personal extensions.
+  orgID: ID
 }
 
 # URL info that can be used to upload the image.
