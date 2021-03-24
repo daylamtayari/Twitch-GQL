@@ -6,10 +6,7 @@
     {
       "name": "deprecated",
       "description": "Marks an element of a GraphQL schema as no longer supported.",
-      "locations": [
-        "FIELD_DEFINITION",
-        "ENUM_VALUE"
-      ],
+      "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
       "args": [
         {
           "name": "reason",
@@ -22,11 +19,7 @@
     {
       "name": "include",
       "description": "Directs the executor to include this field or fragment only when the `if` argument is true.",
-      "locations": [
-        "FIELD",
-        "FRAGMENT_SPREAD",
-        "INLINE_FRAGMENT"
-      ],
+      "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
       "args": [
         {
           "name": "if",
@@ -38,11 +31,7 @@
     {
       "name": "skip",
       "description": "Directs the executor to skip this field or fragment when the `if` argument is true.",
-      "locations": [
-        "FIELD",
-        "FRAGMENT_SPREAD",
-        "INLINE_FRAGMENT"
-      ],
+      "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
       "args": [
         {
           "name": "if",
@@ -2819,14 +2808,8 @@
     "Watching": "Watching"
   },
   "_implementations": {
-    "Directory": [
-      "Game"
-    ],
-    "DropType": [
-      "EventBasedDrop",
-      "ManualTriggerBasedDrop",
-      "TimeBasedDrop"
-    ],
+    "Directory": ["Game"],
+    "DropType": ["EventBasedDrop", "ManualTriggerBasedDrop", "TimeBasedDrop"],
     "ExtensionView": [
       "ComponentView",
       "ConfigView",
@@ -2836,30 +2819,12 @@
       "PanelView",
       "VideoOverlayView"
     ],
-    "OEmbed": [
-      "LinkOEmbed",
-      "PhotoOEmbed",
-      "RichOEmbed",
-      "VideoOEmbed"
-    ],
-    "ProductCatalogItem": [
-      "CelebrationProduct"
-    ],
-    "BitsOffer": [
-      "BitsAdOffer",
-      "BitsBundleOffer"
-    ],
-    "Claimable": [
-      "BitsKeyCode",
-      "GiftCardCode"
-    ],
-    "SelfClaimEdge": [
-      "BitsKeyCodeSelfClaimEdge",
-      "GiftCardCodeSelfClaimEdge"
-    ],
-    "ProductCatalogBenefit": [
-      "CelebrationProductBenefit"
-    ],
+    "OEmbed": ["LinkOEmbed", "PhotoOEmbed", "RichOEmbed", "VideoOEmbed"],
+    "ProductCatalogItem": ["CelebrationProduct"],
+    "BitsOffer": ["BitsAdOffer", "BitsBundleOffer"],
+    "Claimable": ["BitsKeyCode", "GiftCardCode"],
+    "SelfClaimEdge": ["BitsKeyCodeSelfClaimEdge", "GiftCardCodeSelfClaimEdge"],
+    "ProductCatalogBenefit": ["CelebrationProductBenefit"],
     "ChannelModerationActionEntry": [
       "ChannelModerationActionOnAutomodLevelEntry",
       "ChannelModerationActionOnAutomodTermEntry",
@@ -2891,29 +2856,15 @@
       "DashboardActivityFeedActivityResubscribing",
       "DashboardActivityFeedActivitySubscribing"
     ],
-    "Panel": [
-      "DefaultPanel",
-      "ExtensionPanel"
-    ],
-    "HypeTrainReward": [
-      "HypeTrainBadgeReward",
-      "HypeTrainEmoteReward"
-    ],
+    "Panel": ["DefaultPanel", "ExtensionPanel"],
+    "HypeTrainReward": ["HypeTrainBadgeReward", "HypeTrainEmoteReward"],
     "InterruptScheduleError": [
       "InterruptScheduleBoundsError",
       "InterruptScheduleStandardError"
     ],
-    "ChannelChallenge": [
-      "ManualChannelChallenge"
-    ],
-    "Activity": [
-      "Playing",
-      "Streaming",
-      "Watching"
-    ],
-    "RecommendedStream": [
-      "SocialStream"
-    ],
+    "ChannelChallenge": ["ManualChannelChallenge"],
+    "Activity": ["Playing", "Streaming", "Watching"],
+    "RecommendedStream": ["SocialStream"],
     "ChannelDashboardLayout": [
       "StreamManagerMosaicLayout",
       "TwitchStudioMosaicLayout"
