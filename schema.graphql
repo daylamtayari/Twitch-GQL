@@ -323,19 +323,29 @@ input AddChannelBlockedTermInput {
   # isModEditable is if the term is viewable or editable by mods.
   isModEditable: Boolean!
   # phrase defines the string that is to be blocked.
-  phrase: String
-  # phrases is the strings that are blocked.
-  phrases: [String!]!
+  phrase: String!
+  # phrases is the strings that are blocked. Deprecated - please use the phrase field instead.
+  phrases: [String!] = []
 }
 
 # The returned data from the mutation.
 type AddChannelBlockedTermPayload {
-  # The time term was added.
-  addedAt: Time
+  # The newly added term.
+  term: ChannelBlockedTerm
+  # Whether or not the term was previously in the permitted terms list and has now been removed.
+  wasRemovedFromPermittedList: Boolean
   # Mutation error caused by the user input.
   error: AddChannelBlockedTermError
+  # The time term was added.
+  addedAt: Time
+    @deprecated(
+      reason: "Use the term field for information about the newly added term"
+    )
   # The phrases that were added.
   phrases: [String!]!
+    @deprecated(
+      reason: "Use the term field for information about the newly added term"
+    )
 }
 
 # Possible errors that this resolver returns.
@@ -351,19 +361,29 @@ input AddChannelPermittedTermInput {
   # channelID is the owner of the permitted terms.
   channelID: ID!
   # phrase defines the string that is to be permitted.
-  phrase: String
-  # phrases are the strings that are permitted in a channel.
-  phrases: [String!]!
+  phrase: String!
+  # phrases are the strings that are permitted in a channel.  Deprecated - please use the phrase field instead.
+  phrases: [String!] = []
 }
 
 # The returned payload from the mutation.
 type AddChannelPermittedTermPayload {
-  # The time term was added.
-  addedAt: Time
+  # The newly added term.
+  term: ChannelPermittedTerm
+  # Whether or not the term was previously in the blocked terms list and has now been removed.
+  wasRemovedFromBlockedList: Boolean
   # Mutation error caused by the user input.
   error: AddChannelPermittedTermError
+  # The time term was added.
+  addedAt: Time
+    @deprecated(
+      reason: "Use the term field for information about the newly added term"
+    )
   # The phrases that were added.
   phrases: [String!]!
+    @deprecated(
+      reason: "Use the term field for information about the newly added term"
+    )
 }
 
 # AddCollectionItemInput accepts a collectionID and item ID and parameters to add the item to a collection.
@@ -755,6 +775,8 @@ input AdRequestPlayerContext {
   videoSessionID: ID
   # PlayerSizeMode of the incoming request.
   playerSizeMode: String
+  # RaidId of the incoming request.
+  raidID: ID
 }
 
 # The type of ad break being requested.
@@ -3495,6 +3517,8 @@ type Channel {
     @deprecated(reason: "use channel.viewerDropCampaigns")
   # A paginated list of users who are banned from this channel.
   bannedUsers(after: Cursor, first: Int = 25): ChannelBannedUserConnection
+  # A paginated list of the channel's blocked terms.
+  blockedTerms(after: Cursor, first: Int = 25): ChannelBlockedTermConnection
   # The boost settings for the channel.
   boostSettings: BoostSettings
   # The language the broadcaster has chosen to stream in.
@@ -3590,6 +3614,8 @@ type Channel {
   owner: User
   # Configurations for chanlets this channel owns.
   ownerChanletAttributes: OwnerChanletAttributes
+  # A paginated list of the channel's blocked terms.
+  permittedTerms(after: Cursor, first: Int = 25): ChannelPermittedTermConnection
   # Settings dictating how Prediction Events are run on this channel.
   predictionSettings: ChannelPredictionSettings
   # Fetches most recent chat messages sent for the given channel.
@@ -3644,6 +3670,9 @@ type Channel {
 type ChannelAnalytics {
   # SubCountSeries in Channel Analytics that shows a user's sub count over time.
   subCountSeries: SubCountSeries
+  # The details for a authenticated user informing them of their eligibility
+  # requirements for Soft Landing (provided in current and subsequent month).
+  softLandingEligibilityDetails: [SoftLandingEligibilityDetail!]
 }
 
 # Analytics around what other content my viewers watch.
@@ -3682,8 +3711,10 @@ type ChannelBannedUserEdge {
 
 # ChannelBlockedTerm is an object that defines things that automod should permit in a channel.
 type ChannelBlockedTerm {
+  # ID of the term.
+  id: ID!
   # If the term is permitted or banned type.
-  category: String!
+  category: String! @deprecated(reason: "ChannelBlockedTerm is always banned")
   # When the term was created.
   createdAt: Time
   # When the term expires at.
@@ -3691,11 +3722,29 @@ type ChannelBlockedTerm {
   # If mods should be able to see and edit this term.
   isModEditable: Boolean!
   # phrases are the string representation of a term.
-  phrases: [String!]!
-  # Where the term came from, usually a mod user ID.
-  source: String
+  phrases: [String!]! @deprecated(reason: "Replaced by phrase field")
+  # phrase is the string representation of a term.
+  phrase: String!
+  # User who added the term to the blocked terms list.
+  source: User
   # When the term was last updated.
   updatedAt: Time
+}
+
+# Paginated list of Channel Blocked Terms.
+type ChannelBlockedTermConnection {
+  # The elements of the list.
+  edges: [ChannelBlockedTermEdge!]!
+  # Information about this page.
+  pageInfo: PageInfo!
+}
+
+# Element in a list of Channel Blocked Terms.
+type ChannelBlockedTermEdge {
+  # Opaque cursor describing this edge's position in the paginated list.
+  cursor: Cursor!
+  # The Channel Blocked Term.
+  node: ChannelBlockedTerm
 }
 
 # A challenge to which users can contribute bits.
@@ -4144,20 +4193,44 @@ enum ChannelPermission {
 
 # ChannelPermittedTerm is an object that defines things that automod should permit in a channel.
 type ChannelPermittedTerm {
+  # ID of the term.
+  id: ID!
   # If the term is permitted or banned type.
   category: String!
+    @deprecated(
+      reason: "ChannelPermittedTerm type will always be of category permitted"
+    )
   # When the term was created.
   createdAt: Time
   # When the term expires at.
   expiresAt: Time
   # If mods should be able to see and edit this term.
   isModEditable: Boolean!
+    @deprecated(reason: "ChannelPermittedTerm is always mod editable")
   # phrases are the string representation of a term.
-  phrases: [String!]!
-  # Where the term came from, usually a mod user ID.
-  source: String
+  phrases: [String!]! @deprecated(reason: "Replaced by phrase field")
+  # phrase is the string representation of a term.
+  phrase: String!
+  # User who added the term to the permitted terms list.
+  source: User
   # When the term was last updated.
   updatedAt: Time
+}
+
+# Paginated list of Channel Permitted Terms.
+type ChannelPermittedTermConnection {
+  # The elements of the list.
+  edges: [ChannelPermittedTermEdge!]!
+  # Information about this page.
+  pageInfo: PageInfo!
+}
+
+# Element in a list of Channel Permitted Terms.
+type ChannelPermittedTermEdge {
+  # Opaque cursor describing this edge's position in the paginated list.
+  cursor: Cursor!
+  # The Channel Permitted Term.
+  node: ChannelPermittedTerm
 }
 
 # Settings dictating how Prediction Events are run on a channel.
@@ -7007,6 +7080,42 @@ enum CookieVendorType {
   ANALYTICS
   # Vendors cookies that are used for advertising purposes.
   ADVERTISING
+}
+
+# A claim filed under a copyright law that a channel has infringed upon a copyholder's rights.
+type CopyrightClaim {
+  # The id of the claim.
+  id: ID!
+  # The individual or group who filed a copyright claim.
+  claimant: CopyrightClaimant!
+  # The work that is claimed to be wrongfully used.
+  work: String!
+  # The date on which this claim was filed.
+  date: Time!
+}
+
+# Details about the individual or group who filed a copyright claim.
+type CopyrightClaimant {
+  # The name of the claim issuer.
+  name: String!
+  # The email of the claim issuer.
+  email: String!
+}
+
+# Paginated list of Copyright Claims.
+type CopyrightClaimConnection {
+  # The elements of the list.
+  edges: [CopyrightClaimEdge!]
+  # Pagination information.
+  pageInfo: PageInfo!
+}
+
+# An edge for Copyright Claim data.
+type CopyrightClaimEdge {
+  # Opaque cursor describing this edge's position in the paginated list.
+  cursor: Cursor!
+  # The specific CopyrightClaim that belongs to this edge.
+  node: CopyrightClaim!
 }
 
 # Errors for creating emotes.
@@ -20839,6 +20948,14 @@ type Query {
   contentTag(id: ID!): Tag
   # Get content tags by tag IDs.
   contentTags(ids: [ID!]): [Tag!]
+  # Get a single copyright claim by id, null if not found.
+  copyrightClaim(id: ID!): CopyrightClaim
+  # Get the copyright claims filed against a channel given the channel id.
+  copyrightClaims(
+    channelID: ID!
+    first: Int = 10
+    after: Cursor
+  ): CopyrightClaimConnection
   # Get a Creator Camp article.
   creatorCampArticle(id: ID!, category: String!): CreatorCampArticle
   # Get a Creator Camp category.
@@ -25896,6 +26013,23 @@ type SocialStream implements RecommendedStream {
   stream: Stream
   # The type of recommendation. Different types contain different metadata about why the recommendation was made.
   type: StreamRecommendationType
+}
+
+# A representation of Softlanding details that include eligibility requirements for a specific month.
+type SoftLandingEligibilityDetail {
+  # The actual earnings the broadcaster has made for the month-year.
+  actualEarnings: Float!
+  # The adjusted amount is the diff between the actual earnings and min guaranteed
+  # revenue (actual has to be less or this is 0).
+  adjustedAmount: Float!
+  # The minimum broadcast requirement for a creator to receive Soft Landing.
+  minBroadcastHours: Float!
+  # The minimum guaranteed revenue for a creator as Soft Landing.
+  minGuaranteedRev: Float!
+  # The month the eligibility detail is for.
+  month: Int!
+  # The year the eligibility detail is for.
+  year: Int!
 }
 
 # Sort direction.
@@ -31831,6 +31965,7 @@ type User {
   # The list of channels that have added this user as a channel to automatically host when their channel is not
   # streaming live. Users can only view their own autohosted by channels.
   autohostedByChannels: AutohostedByChannelConnection
+    @deprecated(reason: "This functionality has been removed")
   # An action that a user or session is performing. This field is null if the user is not friends with
   # the authenticated user.
   availability: Availability
@@ -31890,6 +32025,7 @@ type User {
   blizzardAccount: BlizzardUser
   # Get the blocked terms of a user.
   blockedTerms: [ChannelBlockedTerm!]!
+    @deprecated(reason: "Use channel.blockedTerms instead")
   # blockedUsers returns a list users that are restrained from directly communicating with this user.
   blockedUsers: [User]!
   # bounties is a list of bounty board bounties for this user.
@@ -32345,6 +32481,7 @@ type User {
   payoutPlans: [PayoutPlan!]
   # Get the permitted terms of a user.
   permittedTerms: [ChannelPermittedTerm!]!
+    @deprecated(reason: "Use channel.permittedTerms instead")
   # The user's phone number. Format is always in E.164 format.
   # This is only returned if the request is authenticated by the same user whose phone is requested.
   phoneNumber: String
