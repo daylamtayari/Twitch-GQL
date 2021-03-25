@@ -9225,13 +9225,41 @@ type CreatorHome {
   # Id for caching.
   id: ID!
   # Clusters for layout information.
-  clusters: [CreatorHomeCluster!]!
+  clusters: [CreatorHomeCluster!]
+  # Panels containing Creator Home cards.
+  panels: [CreatorHomePanel!]
+}
+
+# Interface defining the base requirements for Creator Home Cards.
+interface CreatorHomeCard {
+  # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
+  type: String!
 }
 
 # Predefined clusters for creators.
 type CreatorHomeCluster {
   # Unique identifier for the cluster, i.e. "FAR_FROM_AFFILIATE".
   id: ID!
+}
+
+# Predefined panels containing dynamic cards.
+type CreatorHomePanel {
+  # Predefined identifier for the panel.
+  type: CreatorHomePanelType!
+  # List of ordered cards to display.
+  cards: [CreatorHomeCard!]!
+}
+
+# Types of Creator Home panels.
+enum CreatorHomePanelType {
+  # Top panel section with intro and insights.
+  HERO
+  # Panel displaying stream related shortcuts.
+  SHORTCUTS
+  # Right panel displaying creator action items.
+  ACTIONS
+  # Panel displaying the tip of the day.
+  TIPS
 }
 
 # Creator metrics for the given time period.
@@ -14143,6 +14171,12 @@ type GenerateSubscribersCSVPayload {
   channelID: ID!
 }
 
+# Generic card containing only the name of the card to display.
+type GenericCreatorHomeCard implements CreatorHomeCard {
+  # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
+  type: String!
+}
+
 # The input for getting upload config.
 input GetEmoteUploadConfigInput {
   # The type of asset to be uploaded.
@@ -15004,6 +15038,15 @@ enum IngestStreamHealthStatus {
   UNSTABLE
   # Health Status not set.
   UNKNOWN
+}
+
+# Insight cards contains a single piece of information in regards to a creator's stream.
+type InsightCreatorHomeCard implements CreatorHomeCard {
+  # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
+  type: String!
+  # currentValue indicates where the creator is in regards to an insight.
+  # i.e You have gained "12" new followers.
+  currentValue: Float!
 }
 
 # InstallExtensionError is wrapper for error associated with the installExtension mutation.
@@ -26391,6 +26434,18 @@ type StartWatchPartyPayload {
   error: WatchPartyError
   # The watch party that was started.
   watchParty: WatchParty
+}
+
+# Stat cards contains the required target for a milestone and the current progress.
+type StatCreatorHomeCard implements CreatorHomeCard {
+  # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
+  type: String!
+  # currentValue indicates where the creator is in regards to a required goal.
+  # i.e Get 50 Followers, broadcaster has "19".
+  currentValue: Float!
+  # targetValue indicates the target for a given stat.
+  # i.e Get "50" Followers, broadcaster has 19.
+  targetValue: Float!
 }
 
 # Error code for an error that occurs while stopping the bounty.
