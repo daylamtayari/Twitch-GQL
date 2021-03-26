@@ -22457,6 +22457,8 @@ input RegisterTwoFactorConfirmationInput {
 type RegisterTwoFactorConfirmationPayload {
   # New access token returned for clients to use after turning on 2FA.
   accessToken: String
+  # Whether the user's two factor account ID is associated to multiple twitch accounts.
+  isTwoFactorAccountShared: Boolean
   # error code and localized error.
   error: RegisterTwoFactorConfirmationError
 }
