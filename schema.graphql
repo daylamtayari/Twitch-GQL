@@ -10403,6 +10403,20 @@ type DeleteCelebrationPayload {
   error: CelebrationError
 }
 
+# Inputs for the mutation. channel ID and a list of phrases to be deleted.
+input DeleteChannelBlockedTermByIDInput {
+  # channelID is the owner of the term being deleted.
+  channelID: ID!
+  # id of the term to be deleted.
+  id: ID!
+}
+
+# The returned payload from the mutation.
+type DeleteChannelBlockedTermByIDPayload {
+  # Mutation error caused by the user input.
+  error: DeleteChannelBlockedTermError
+}
+
 # Errors that the mutation returns.
 type DeleteChannelBlockedTermError {
   # The error code that the mutation returned.
@@ -10443,6 +10457,20 @@ input DeleteChannelClipsInput {
 type DeleteChannelClipsPayload {
   # channelID is the channel's ID.
   channelID: ID!
+}
+
+# Inputs for the mutation. channel ID and a list of phrases to be deleted.
+input DeleteChannelPermittedTermByIDInput {
+  # channelID is the ID of the owner of the permitted term being deleted.
+  channelID: ID!
+  # the ID of the term to be deleted.
+  id: ID!
+}
+
+# Returned payload of the mutation.
+type DeleteChannelPermittedTermByIDPayload {
+  # Mutation error caused by the user input.
+  error: DeleteChannelPermittedTermError
 }
 
 # The errors returned from this mutation.
@@ -16967,12 +16995,20 @@ type Mutation {
   deleteChannelBlockedTerm(
     input: DeleteChannelBlockedTermInput!
   ): DeleteChannelBlockedTermPayload
+  # Deletes a blocked term from a channel using the term ID.
+  deleteChannelBlockedTermByID(
+    input: DeleteChannelBlockedTermByIDInput!
+  ): DeleteChannelBlockedTermByIDPayload
   # Deletes clips from a channel.
   deleteChannelClips(input: DeleteChannelClipsInput!): DeleteChannelClipsPayload
   # Deletes a permitted term from a channel.
   deleteChannelPermittedTerm(
     input: DeleteChannelPermittedTermInput!
   ): DeleteChannelPermittedTermPayload
+  # Deletes a permitted term from a channel using the term ID.
+  deleteChannelPermittedTermByID(
+    input: DeleteChannelPermittedTermByIDInput!
+  ): DeleteChannelPermittedTermByIDPayload
   # deleteChatMessage deletes a single message from stream chat.
   deleteChatMessage(input: DeleteChatMessageInput!): DeleteChatMessagePayload
   # Deletes a custom cheermote tier from a channel.
@@ -20761,6 +20797,8 @@ type PublishSubscriptionEmotePayload {
 
 # Parameters to get details about a purchasable offer for the current logged in user.
 input PurchasableOfferParams {
+  # CountryCode for the offer. It will need to be in ISO 3166 Alpha-2 format(e.g. "US", "BR", "HK").
+  countryCode: String
   # List of gift recipient IDs if the offer is giftable.
   giftRecipientIDs: [ID!]
   # The ID of the Offer.
@@ -27338,7 +27376,7 @@ type SubscriptionGift {
   isGift: Boolean!
 }
 
-# A parent field for grouping the different types of gift subscriptions.
+# A parent field for grouping the different types of subscription gift offers.
 type SubscriptionGifting {
   # Offers and associated metadata for purchasing community gift subscriptions.
   community: [SubscriptionCommunityGifting!]
@@ -27487,7 +27525,8 @@ type SubscriptionProduct {
   # The subscription product's promotion if it is active.
   giftPromotion: SubscriptionPromotion
   # The different types of gift subscriptions ("Community" vs "Standard").
-  gifting: SubscriptionGifting!
+  # Optional countryCode will need to be in ISO 3166 Alpha-2 format(e.g. "US", "BR", "HK").
+  gifting(countryCode: String): SubscriptionGifting!
   # Whether the subscription hides ads for the channel.
   hasAdFree: Boolean!
   # Whether the subscribers of this product are affected by slow chat mode.
@@ -27503,7 +27542,8 @@ type SubscriptionProduct {
   # The subscription product's name.
   name: String!
   # Available offers for a subscription product.
-  offers: [Offer!]
+  # Optional countryCode will need to be in ISO 3166 Alpha-2 format(e.g. "US", "BR", "HK").
+  offers(countryCode: String): [Offer!]
   # The Twitch user that is the owner of the channel associated with this subscription product.
   # This is null for SubscriptionProducts like 'turbo' that are not associated with any user.
   owner: User
