@@ -3670,9 +3670,6 @@ type Channel {
 type ChannelAnalytics {
   # SubCountSeries in Channel Analytics that shows a user's sub count over time.
   subCountSeries: SubCountSeries
-  # The details for a authenticated user informing them of their eligibility
-  # requirements for Soft Landing (provided in current and subsequent month).
-  softLandingEligibilityDetails: [SoftLandingEligibilityDetail!]
 }
 
 # Analytics around what other content my viewers watch.
@@ -12211,6 +12208,14 @@ type EmoteSet {
 enum EmoteSetDomain {
   # Emotes that were granted via Twitch crates.
   CRATE
+}
+
+# EmoteSettings contains the full list, settings and limits associated with a channel's emotes.
+type EmoteSettings {
+  # ownedEmotes is the list of emotes owned by this user. This may include
+  # archived and pending emotes. This will only resolve if this user is the
+  # authenticated user.
+  ownedEmotes: [Emote!]
 }
 
 # The state of an emote.
@@ -26098,23 +26103,6 @@ type SocialStream implements RecommendedStream {
   type: StreamRecommendationType
 }
 
-# A representation of Softlanding details that include eligibility requirements for a specific month.
-type SoftLandingEligibilityDetail {
-  # The actual earnings the broadcaster has made for the month-year.
-  actualEarnings: Float!
-  # The adjusted amount is the diff between the actual earnings and min guaranteed
-  # revenue (actual has to be less or this is 0).
-  adjustedAmount: Float!
-  # The minimum broadcast requirement for a creator to receive Soft Landing.
-  minBroadcastHours: Float!
-  # The minimum guaranteed revenue for a creator as Soft Landing.
-  minGuaranteedRev: Float!
-  # The month the eligibility detail is for.
-  month: Int!
-  # The year the eligibility detail is for.
-  year: Int!
-}
-
 # Sort direction.
 enum SortOrder {
   # Ascending (A-Z, 1-9).
@@ -32270,6 +32258,8 @@ type User {
   # If multiple domains are specified, emotes that belong to either domain are returned (OR).
   # If this user is not the current user, it returns nil and a "forbidden" error.
   emoteSets(domains: [EmoteSetDomain!]): [EmoteSet!]
+  # The emote settings includes data associated with this user's uploaded emotes.
+  emoteSettings: EmoteSettings
   # The channel's emoticon prefix settings.
   emoticonPrefix: EmoticonPrefix
   # The list channels that have been endorsed by the user.
