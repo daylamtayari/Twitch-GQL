@@ -12015,7 +12015,7 @@ enum EligiblePaymentMethodName {
 type EmbeddedEmote {
   # The emote's identifier, for example "115847" -> KappaHD.
   emoteID: ID
-  # from is the index of the string where replacement starts.
+  # from is the utf-8 index of the string where replacement starts.
   from: Int
   id: ID
   # setID is the identifier of the set this emote is in.
@@ -15630,17 +15630,17 @@ type LinkOEmbed implements OEmbed {
 # LinkSSOError is an error that occurs when account linking fails.
 type LinkSSOError {
   # The error code that describes why account linking failed.
-  code: LinkSSOErrorCode!
+  code: LinkSSOErrorCode! @deprecated(reason: "To be removed.")
 }
 
 # LinkSSOErrorCode enumerates the possible errors that can cause account linking to fail.
 enum LinkSSOErrorCode {
   # The activation code is incorrect.
-  CODE_INCORRECT
+  CODE_INCORRECT @deprecated(reason: "To be removed.")
   # The activation code is expired.
-  CODE_EXPIRED
+  CODE_EXPIRED @deprecated(reason: "To be removed.")
   # The user has already linked an SSO app of the same type to their account.
-  ALREADY_LINKED
+  ALREADY_LINKED @deprecated(reason: "To be removed.")
 }
 
 # LinkSSOInput links an SSO app to the authenticated user's account if the activation code is valid.
@@ -15652,9 +15652,9 @@ input LinkSSOInput {
 # LinkSSOPayload returns the newly created link or an error if account linking failed.
 type LinkSSOPayload {
   # The error when an app cannot be linked to the user's account.
-  error: LinkSSOError
+  error: LinkSSOError @deprecated(reason: "To be removed.")
   # The new SSO link.
-  link: SSOLink
+  link: SSOLink @deprecated(reason: "To be removed.")
 }
 
 # The location that a piece of text should link to.
@@ -20575,6 +20575,8 @@ enum ProcessIOSPaymentErrorCode {
   INELIGIBLE
   # Unable to process payment due to an invalid argument.
   INVALID_ARGUMENT
+  # Unable to process payment due to a missing transaction.
+  NOT_FOUND
   # An unexpected internal server error occurred.
   INTERNAL_SERVER_ERROR
   # Must have auth credentials to purchase an offer.
@@ -26316,7 +26318,7 @@ enum SquadStreamStatus {
 # SSO apps are the Twitch apps on console and smart TV.
 type SSOLink {
   # The name of the SSO app that is linked to the authenticated user's Twitch account.
-  app: String
+  app: String @deprecated(reason: "To be removed.")
   # The identifier of the device or user account on XboxLive, PSN, etc.
   # that is linked to the authenticated user's Twitch account.
   ssoID: String
@@ -29024,7 +29026,7 @@ input UnlinkSSOInput {
 
 type UnlinkSSOPayload {
   # The deleted SSO links.
-  links: [SSOLink!]
+  links: [SSOLink!] @deprecated(reason: "To be removed.")
 }
 
 # Input for unlocking a chosen modified subscriber emote with Community Points.
