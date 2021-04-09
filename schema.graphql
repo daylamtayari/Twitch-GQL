@@ -713,6 +713,16 @@ type AdProperties {
   vodArchiveMidrollsFrequency: Int
 }
 
+# Defines reminder config for when a reminder will be displayed.
+type AdReminderConfig {
+  # If channel has reminder enabled for when an ad is about to be displayed.
+  isEnabled: Boolean!
+  # Specified desired seconds before an ad reminder is displayed.
+  seconds: Int!
+  # Maximum allowed desired seconds before an ad reminder is displayed.
+  maxSeconds: Int!
+}
+
 # The context of the Client when the ad request is about to be made.
 input AdRequestClientContext {
   # If the client is in audio only mode.
@@ -789,6 +799,16 @@ enum AdrollType {
   POSTROLL
 }
 
+# Defines time settings and boundaries in seconds for ad schedule.
+type AdScheduleConfig {
+  # User specified settings in seconds.
+  desiredSeconds: Int!
+  # Minimum allowed settings in seconds.
+  minSeconds: Int!
+  # Maximum allowed settings in seconds.
+  maxSeconds: Int!
+}
+
 # AdSession is the response object from an Ad Request.
 type AdSession {
   # id is the id of the ad.
@@ -805,6 +825,18 @@ type AdSlot {
   durationSeconds: Int!
   # Time when Ad will run.
   runAtTime: Time!
+}
+
+# Defines snooze configuration for ad management.
+type AdSnoozeConfig {
+  # Amount of snoozes the channel currently has.
+  currentAmount: Int!
+  # Maximum number of snoozes the channel can have at one time.
+  maxAmount: Int!
+  # Time when channel obtains an additional snooze.
+  refreshAt: Time!
+  # How long the snooze will push back the ad.
+  durationSeconds: Int!
 }
 
 # Status of a user's invitation to the Affiliate program.
@@ -11162,6 +11194,18 @@ type Density {
   targetAdMinutes: Int
   # Total amount of ad time.
   totalAdSeconds: Int
+  # If channel has ad schedule enabled.
+  isAdScheduleEnabled: Boolean!
+  # The number of seconds between each ad.
+  interval: AdScheduleConfig!
+  # How long the ad is in seconds.
+  duration: AdScheduleConfig!
+  # How long into the stream before ad begins.
+  startDelay: AdScheduleConfig!
+  # Configuration for reminder functionality.
+  reminder: AdReminderConfig!
+  # Configuration for snooze functionality.
+  snooze: AdSnoozeConfig!
 }
 
 input DenyRejectedChatMessageInput {
@@ -12515,20 +12559,20 @@ type Extension {
   # A single challenge condition associated with the specified extension.
   challengeCondition(
     input: ExtensionChallengeConditionByIDInput!
-  ): ChallengeCondition
+  ): ChallengeCondition @deprecated
   # The list of challenge condition participants that are associated with this
   # extension for a particular condition participant owner and condition owner.
   challengeConditionParticipants(
     first: Int = 100
     after: Cursor
     input: ExtensionChallengeConditionParticipantsInput!
-  ): ExtensionChallengeConditionParticipantConnection
+  ): ExtensionChallengeConditionParticipantConnection @deprecated
   # The list of challenge conditions that are associated with this extension.
   challengeConditions(
     first: Int = 100
     after: Cursor
     input: ExtensionChallengeConditionsInput!
-  ): ExtensionChallengeConditionConnection
+  ): ExtensionChallengeConditionConnection @deprecated
   # The client ID of the extension. Also used as the non-composite, non-unique ID of an extension internally.
   clientID: ID!
   # The URL which is used to preset the configuration experience of the extension.
@@ -16799,12 +16843,12 @@ type Mutation {
   # createBitsChallengeConditionForExtension creates a Bits condition on behalf of a user by an extension.
   createBitsChallengeConditionForExtension(
     input: CreateBitsChallengeConditionForExtensionInput!
-  ): CreateBitsChallengeConditionForExtensionPayload
+  ): CreateBitsChallengeConditionForExtensionPayload @deprecated
   # createBitsChallengeConditionParticipantForExtension creates a Bits condition
   # participant on behalf of a user by an extension.
   createBitsChallengeConditionParticipantForExtension(
     input: CreateBitsChallengeConditionParticipantForExtensionInput!
-  ): CreateBitsChallengeConditionParticipantForExtensionPayload
+  ): CreateBitsChallengeConditionParticipantForExtensionPayload @deprecated
   # createBountyCampaign creates a campaign for Bounty Board.
   createBountyCampaign(
     input: CreateBountyCampaignInput!
@@ -21055,7 +21099,7 @@ type Query {
     period: TimeSeriesPeriod!
   ): CreatorDashboard
   # Get information for the Creator Home page.
-  creatorHome: CreatorHome
+  creatorHome(channelID: ID): CreatorHome
   # Get the chanel/viewer pair with the current user and the channelID.
   currentChannelViewer(channelID: ID!): ChannelViewer
   # The currently authenticated user.
