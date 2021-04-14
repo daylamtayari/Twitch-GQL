@@ -5013,6 +5013,8 @@ enum ClaimBountyErrorCode {
   BOUNTY_LIMIT_REACHED
   # User already claimed that bounty.
   BOUNTY_ALREADY_CLAIMED
+  # The user is not authorized to claim the bounty.
+  UNAUTHORIZED
   # Unknown error being returned from service.
   UNKNOWN_ERROR
 }
@@ -17660,6 +17662,8 @@ type Mutation {
   ): SetUnbanRequestsSettingsPayload
   # Set user's country of residence.
   setUserResidence(input: SetUserResidenceInput!): SetUserResidencePayload
+  # Make a SnoozeNextAdRequest.
+  snoozeAd(input: SnoozeAdInput!): SnoozeAdPayload
   # Spend Twitch Prime monthly subscription credit.
   spendSubscriptionCredit(
     input: SpendSubscriptionCreditInput!
@@ -26126,6 +26130,28 @@ type SmiliesSet {
   emotes: [Emote!]
   # ID for the current smilies set.
   id: ID
+}
+
+# Inputs to the SnoozeAd mutation.
+input SnoozeAdInput {
+  # targetChannelID is the target ID of the channel.
+  targetChannelID: ID!
+  # snoozeDuration is the requested time in seconds to snooze.
+  snoozeDuration: Int
+}
+
+# Outputs from the SnoozeAd mutation.
+type SnoozeAdPayload {
+  # status gives the status code of the Vader request (SUCCESS or ERROR).
+  status: SnoozeAdStatusCode
+}
+
+# Snooze status code depending on Vader response.
+enum SnoozeAdStatusCode {
+  # Success status if snooze endpoint successfully called.
+  SUCCESS
+  # Error status if snooze endpoint called but failed.
+  ERROR
 }
 
 # A social media item that is an attribute of Channel.
