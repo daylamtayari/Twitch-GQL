@@ -273,7 +273,7 @@ type AdCreative {
   # The AdCreative's unique identifier.
   id: ID!
   # Integrated loudness value for this AdCreative.
-  integratedLoudness: Float
+  integratedLoudness: Float @deprecated
 }
 
 # AddAutohostChannelsInput append channelIDs to a user's list to autohost.
@@ -7141,12 +7141,70 @@ type CopyrightClaimConnection {
   pageInfo: PageInfo!
 }
 
+# Contact information of the entity submitting a copyright claim.
+input CopyrightClaimContact {
+  # The relationship that the form submitter has to the affected party.
+  relationship: String!
+  # The name of the entity that owns the content.
+  ownerName: String!
+  # The claimant's name.
+  claimantName: String!
+  # Phone number to contact regarding this copyright claim.
+  phoneNumber: String!
+  # Contact email address of the entity submitting this form.
+  emailAddress: String!
+  # Twitch email linked to the logged in user submitting this claim.
+  twitchEmail: String!
+  # Origin country of the copyright submitter.
+  country: String!
+  # Origin city of the copyright submitter.
+  city: String!
+  # Street address of the copyright submitter.
+  streetAddress: String!
+  # State/Province of the copyright submitter.
+  stateOrProvince: String!
+  # Zipcode of the copyright submitter.
+  zipCode: String!
+}
+
 # An edge for Copyright Claim data.
 type CopyrightClaimEdge {
   # Opaque cursor describing this edge's position in the paginated list.
   cursor: Cursor!
   # The specific CopyrightClaim that belongs to this edge.
   node: CopyrightClaim!
+}
+
+# Information detailing a piece of copyrighted content.
+input CopyrightedWork {
+  # Description of the work being alledgedly infringed upon.
+  description: String!
+  # The type of the copyrighted work.
+  type: CopyrightedWorkType!
+  # URL directing to an example/showing of the copyrighted work.
+  url: String!
+}
+
+# Copyrighted work Enum Types [video, photo, artwork, music, other].
+enum CopyrightedWorkType {
+  # The copyrighted work was of type OTHER.
+  OTHER
+  # The copyrighted work was of type VIDEO.
+  VIDEO
+  # The copyrighted work was of type IMAGE/PHOTO.
+  IMAGE_OR_PHOTO
+  # The copyrighted work was of type ARTWORK.
+  ARTWORK
+  # The copyrighted work was of type MUSIC.
+  MUSIC
+}
+
+# Timestamp of when the copyright infringment occurred.
+input CopyrightTimeOffset {
+  # When the start of the timestamp began.
+  startTimeSeconds: Int!
+  # Optional: provides an end bound to this timestamp.
+  endTimeSeconds: Int
 }
 
 # Errors for creating emotes.
@@ -7157,8 +7215,8 @@ type CreateArchivedEmoteError {
 
 # Possible error codes returned for creating emotes.
 enum CreateArchivedEmoteErrorCode {
-  # The creator has reached their limit of archived emotes.
-  EMOTE_LIMIT_REACHED
+  # The user cannot own any more emotes of this type.
+  USER_OWNED_EMOTE_LIMIT_REACHED
   # Only the channel owner is allowed to upload archived emotes.
   INVALID_OWNER
   # The emote code submitted is unacceptable (contains offensive, banned, or "bad" words, which violates guidelines).
@@ -8298,6 +8356,8 @@ enum CreateOrganizationApplicationErrorCode {
   INTERNAL_ERROR
   # Invalid Argument.
   INVALID_ARGUMENT
+  # Organization already exists.
+  ALREADY_EXISTS
 }
 
 # Input to the CreateOrganizationApplication mutation.
@@ -10460,24 +10520,6 @@ enum DeleteChannelBlockedTermErrorCode {
   NO_PERMISSIONS
 }
 
-# Inputs for the mutation. channel ID and a list of phrases to be deleted.
-input DeleteChannelBlockedTermInput {
-  # channelID is the owner of the term being deleted.
-  channelID: ID!
-  # phrases is the strings representation of the term being deleted.
-  phrases: [String!]!
-}
-
-# The returned payload from the mutation.
-type DeleteChannelBlockedTermPayload {
-  # The time term was deleted.
-  deletedAt: Time
-  # Mutation error caused by the user input.
-  error: DeleteChannelBlockedTermError
-  # The phrases that were deleted.
-  phrases: [String!]!
-}
-
 # Inputs for the deleting a channel's clip.
 input DeleteChannelClipsInput {
   # channelID is the channel's ID.
@@ -10514,24 +10556,6 @@ type DeleteChannelPermittedTermError {
 enum DeleteChannelPermittedTermErrorCode {
   # User does not have permission to delete Permitted term in channel.
   NO_PERMISSIONS
-}
-
-# Inputs for the mutation. channel ID and a list of phrases to be deleted.
-input DeleteChannelPermittedTermInput {
-  # channelID is the ID of the owner of the permitted term being deleted.
-  channelID: ID!
-  # phrases is the string representation of the term being deleted.
-  phrases: [String!]!
-}
-
-# Returned payload of the mutation.
-type DeleteChannelPermittedTermPayload {
-  # The time term was deleted.
-  deletedAt: Time
-  # Mutation error caused by the user input.
-  error: DeleteChannelPermittedTermError
-  # The phrases that were deleted.
-  phrases: [String!]!
 }
 
 # The input for deleteChatMessage.
@@ -10723,6 +10747,37 @@ input DeleteContentTagsInput {
 type DeleteContentTagsPayload {
   # Content which tags have been deleted from.
   content: TaggedContent
+}
+
+# Error codes for issues that may occur when trying to delete a layout.
+enum DeleteDashboardViewErrorCode {
+  # An unhandled error.
+  UNKNOWN
+  # The layoutID argument is required.
+  INVALID_ARGUMENT_LAYOUTID
+  # The userID argument is required.
+  INVALID_ARGUMENT_USERID
+  # One or more unspecified arguments are invalid. These are not
+  # user-actionable, but might indicate a logic error.
+  INVALID_ARGUMENT
+}
+
+# Deletes a layout with the specified id
+# Input for updating properties of an existing Mosaic layout.
+# Must specify the id of the layout, which is validated based
+# on the current userID.
+# Input for deleting the existing layout.
+input DeleteDashboardViewInput {
+  # The id of the specific layout to be deleted. This identifies a combination of
+  # type and channel for this user, and has an additional unique component to
+  # distinguish it from other layouts for this type and channel.
+  id: ID!
+}
+
+# Result of the deleteDashboardView mutation.
+type DeleteDashboardViewPayload {
+  # Represents an error when attempting to delete a layout.
+  errorCode: DeleteDashboardViewErrorCode
 }
 
 # The input required when making a request to delete a user's default payment method for a given provider.
@@ -12191,6 +12246,14 @@ type EmoteImageUploadConfiguration {
   uploadURL: String
 }
 
+# EmoteLimits contains all the emote-related limits for a user.
+type EmoteLimits {
+  # The maximum number of animated emotes that the user can own.
+  maxOwnedAnimated: Int!
+  # The maximum number of static emotes that the user can own.
+  maxOwnedStatic: Int!
+}
+
 # The name of an emote modifier and it's abbreviated code.
 type EmoteModifier {
   # The code to use the emote modifier in chat.
@@ -12258,6 +12321,8 @@ enum EmoteSetDomain {
 
 # EmoteSettings contains the full list, settings and limits associated with a channel's emotes.
 type EmoteSettings {
+  # The emote-related limits associated with a user.
+  emoteLimits: EmoteLimits
   # ownedEmotes is the list of emotes owned by this user. This may include
   # archived and pending emotes. This will only resolve if this user is the
   # authenticated user.
@@ -12313,6 +12378,8 @@ enum EmoteType {
   MEGA_COMMERCE
   # Emotes which have intentionally been given no associated feature because they are only available in the Emotes Library.
   ARCHIVE
+  # Emote is a follower emote.
+  FOLLOWER
   # Emote has an unknown type.
   UNKNOWN
 }
@@ -17042,20 +17109,12 @@ type Mutation {
   ): DeleteBitsBadgeTierEmoticonPayload
   # Deletes a celebration from the channel.
   deleteCelebration(input: DeleteCelebrationInput!): DeleteCelebrationPayload
-  # Deletes a blocked term from a channel.
-  deleteChannelBlockedTerm(
-    input: DeleteChannelBlockedTermInput!
-  ): DeleteChannelBlockedTermPayload
   # Deletes a blocked term from a channel using the term ID.
   deleteChannelBlockedTermByID(
     input: DeleteChannelBlockedTermByIDInput!
   ): DeleteChannelBlockedTermByIDPayload
   # Deletes clips from a channel.
   deleteChannelClips(input: DeleteChannelClipsInput!): DeleteChannelClipsPayload
-  # Deletes a permitted term from a channel.
-  deleteChannelPermittedTerm(
-    input: DeleteChannelPermittedTermInput!
-  ): DeleteChannelPermittedTermPayload
   # Deletes a permitted term from a channel using the term ID.
   deleteChannelPermittedTermByID(
     input: DeleteChannelPermittedTermByIDInput!
@@ -17083,6 +17142,10 @@ type Mutation {
   deleteCompetition(input: DeleteCompetitionInput!): DeleteCompetitionPayload
   # deleteContentTags removes the tags specified and associates it with the piece of content specified.
   deleteContentTags(input: DeleteContentTagsInput!): DeleteContentTagsPayload
+  # Deletes a layout with the specified id.
+  deleteDashboardView(
+    input: DeleteDashboardViewInput!
+  ): DeleteDashboardViewPayload
   # Deletes the default payment method for a user.
   # Currently supports the Zuora (credit card) and Recurly (credit card, Pay-with-Amazon, PayPal) payment providers.
   deleteDefaultPaymentMethod(
@@ -17519,6 +17582,10 @@ type Mutation {
   setBitsUserSettings(
     input: SetBitsUserSettingsInput!
   ): SetBitsUserSettingsPayload
+  # Set a channel's ad break schedule preferences.
+  setChannelAdSchedule(
+    input: SetChannelAdScheduleInput!
+  ): SetChannelAdSchedulePayload
   # Set value for channel_feed_enabled.
   setChannelFeedEnabled(
     input: SetChannelFeedEnabledInput!
@@ -17690,6 +17757,10 @@ type Mutation {
   stopCloudBroadcast(input: StopCloudBroadcastInput!): StopCloudBroadcastPayload
   # Stop a Prime Video Watch Party.
   stopWatchParty(input: StopWatchPartyInput!): StopWatchPartyPayload
+  # Submit Copyright Claim Notice.
+  submitCopyrightClaim(
+    input: SubmitCopyrightClaimInput!
+  ): SubmitCopyrightClaimPayload
   # Submit CSAT (customer satisfaction) feedback.
   submitCSATFeedback(input: SubmitCSATFeedbackInput!): SubmitCSATFeedbackPayload
   # Submit a new emote prefix for a given channel. Each channel has a single prefix.
@@ -20716,6 +20787,10 @@ type ProgramAgreement {
   type: PayoutOnboardingCategory!
   # Agreement version (e.g. "v1").
   version: String!
+  # Agreement start date.
+  startDate: Time!
+  # Agreement end date.
+  endDate: Time!
 }
 
 # Types that can only be displayed for an Offer Promotion.
@@ -20801,6 +20876,8 @@ enum PublishSubscriptionEmoteErrorCode {
   EMOTE_CODE_ALREADY_EXISTS
   # The emote code submitted is unacceptable (contains offensive, banned, or "bad" words, which violates guidelines).
   EMOTE_CODE_UNACCEPTABLE
+  # The user cannot own any more emotes of this type.
+  USER_OWNED_EMOTE_LIMIT_REACHED
   # Data for least one of the image sizes is not provided or invalid.
   INCOMPLETE_EMOTE_IMAGE_DATA
   # The emote code suffix submitted contains invalid characters.
@@ -21353,6 +21430,7 @@ type Query {
   # Get users by query in search. for search page product use searchFor instead.
   searchUsers(
     userQuery: String!
+    hasSubscriptionProductsOnly: Boolean
     first: Int = 25
     after: Cursor
   ): SearchUserConnection
@@ -21430,6 +21508,8 @@ type Query {
   user(id: ID, login: String, lookupType: UserLookupType = ACTIVE): User
   # Fetch the user by a specific attribute.
   userByAttribute(input: UserByAttribute!): User
+  # Get the settings associated with a user's uploaded emotes.
+  userEmoteSettings(userID: ID!): EmoteSettings
   # Fetch a user by their ID, or receive a reason indicating
   # why the user could not be retrieved.
   userResultByID(id: ID!): UserResult
@@ -23072,6 +23152,32 @@ enum ReportContentType {
   VOD_REPORT
   # Report against a whisper. Deprecated in favor of the whisperReport mutation.
   WHISPER_REPORT @deprecated(reason: "use whisperReport mutation instead.")
+}
+
+# Information detailing the twitch content that is alledgedly infringing upon a copyrighted work.
+input ReportedContent {
+  # URL of the content.
+  url: String!
+  # The reported content's type.
+  type: ReportedContentType!
+  # If the reported content is of type past livestream, broadcastTime indictates when the reported stream was live.
+  broadcastTime: Time
+  # The timestamps where the infringement alledgedly occured for livestreams and vods.
+  timestamps: [CopyrightTimeOffset!]
+}
+
+# Alledgedly infringing content types [livestream, vod, clip].
+enum ReportedContentType {
+  # The alledgedly infringing content is of type LIVESTREAM.
+  ONGOING_LIVESTREAM
+  # Content is of type past livestream (not currently broadcasting).
+  PAST_LIVESTREAM
+  # The alledgedly infringing content is of type VOD.
+  VOD
+  # The alledgedly infringing content is of type CLIP.
+  CLIP
+  # The alledgedly infringing content type is of type OTHER.
+  OTHER
 }
 
 # A valid reason for a report.
@@ -25071,6 +25177,42 @@ type SetBitsUserSettingsPayload {
   currentUser: User
 }
 
+# Sets the ad schedule preferences for the channel.
+input SetChannelAdScheduleInput {
+  # Input for target ID of channel.
+  targetChannelID: ID!
+  # Input for if channel has ad schedule enabled.
+  isAdScheduleEnabled: Boolean
+  # Input for desired ad break length.
+  scheduledAdDurationPreferenceSeconds: Int
+  # Input for desired number of seconds between each ad break.
+  scheduledAdIntervalPreferenceSeconds: Int
+  # Input for how long into the stream before scheduled ad breaks begin.
+  adStartDelaySeconds: Int
+  # Input for if channel has reminder enabled for when an ad is about to be displayed.
+  isAdReminderEnabled: Boolean
+  # Input for desired seconds before an ad reminder is displayed.
+  adReminderTimeSeconds: Int
+}
+
+# Shows the newly updated values for channel ad schedule settings.
+type SetChannelAdSchedulePayload {
+  # ID of the channel.
+  targetChannelID: ID
+  # If channel has ad schedule enabled.
+  isAdScheduleEnabled: Boolean
+  # The desired ad break length.
+  intervalSeconds: Int
+  # The desired number of seconds between each ad.
+  durationSeconds: Int
+  # How long into the stream before scheduled ad breaks begin.
+  startDelaySeconds: Int
+  # If channel has reminder enabled for when an ad is about to be displayed.
+  isAdReminderEnabled: Boolean
+  # Desired seconds before an ad reminder is displayed.
+  adReminderTimeSeconds: Int
+}
+
 input SetChannelFeedEnabledInput {
   # The new desired value for channel_feed_enabled.
   enabled: Boolean!
@@ -26418,6 +26560,8 @@ input StartAdInput {
   channelID: ID!
   # lengthSeconds is the requested ad break length in seconds (30s ad, 60s ad, etc).
   lengthSeconds: Int
+  # The source of where this call came from.
+  trigger: StartAdTrigger
 }
 
 # StartAdPayload ...
@@ -26426,6 +26570,14 @@ type StartAdPayload {
   adSession: AdSession
   # error is the StartAdError object from a failed request.
   error: StartAdError
+}
+
+# StartAdTrigger is what triggered the ad.
+enum StartAdTrigger {
+  # The ad was triggered from the quick actions button on the dashboard.
+  QUICK_ACTION
+  # The ad was triggered automatically by the ads manager.
+  ADS_MANAGER
 }
 
 # Error code for an error that occurs while starting the bounty.
@@ -27066,6 +27218,34 @@ type SubCountTierDataPoint {
   count: Int!
   # The type of subscription, i.e. Tier 1, Tier 2, Tier 3.
   tier: String!
+}
+
+# Submit copyright claim error detailing the error message.
+type SubmitCopyrightClaimError {
+  # Error message detailing what fields were incorrect.
+  message: String!
+}
+
+# CopyrightClaimRequest Input of the copyright claim request being submitted.
+input SubmitCopyrightClaimInput {
+  # This is the original work that is alledgedly being used without permission.
+  copyrightedWork: CopyrightedWork!
+  # All pieces of content that are alledgedly infringing upon the copyrighted work. Max 50 pieces of content.
+  reportedContents: [ReportedContent!]!
+  # Contact information for the claimant initiating the copyright claim request.
+  contactInformation: CopyrightClaimContact!
+  # Signature of the claimant, verifying that they read and agreed to the terms.
+  signature: String!
+  # This is the token used for captcha to protect Twitch against bots.
+  captchaToken: String
+}
+
+# Output from the submit copyright claim mutation.
+type SubmitCopyrightClaimPayload {
+  # ID of the claim that was created, if request was successful.
+  claimID: ID
+  # An error describing why the claim was not created.
+  error: SubmitCopyrightClaimError
 }
 
 # Wrapper for errors associated with submitCSATFeedback mutation.
@@ -29393,6 +29573,8 @@ enum UpdateBitsBadgeTiersErrorCode {
   EMOTE_CODE_ALREADY_EXISTS
   # The emote code submitted is unacceptable (contains offensive, banned, or "bad" words, which violates guidelines).
   EMOTE_CODE_UNACCEPTABLE
+  # The user cannot own any more emotes of this type.
+  USER_OWNED_EMOTE_LIMIT_REACHED
   # Data for least one of the image sizes is not provided.
   INCOMPLETE_BADGE_IMAGE_DATA
   # Other errors returned from the service.
@@ -32330,8 +32512,6 @@ type User {
   # If multiple domains are specified, emotes that belong to either domain are returned (OR).
   # If this user is not the current user, it returns nil and a "forbidden" error.
   emoteSets(domains: [EmoteSetDomain!]): [EmoteSet!]
-  # The emote settings includes data associated with this user's uploaded emotes.
-  emoteSettings: EmoteSettings
   # The channel's emoticon prefix settings.
   emoticonPrefix: EmoticonPrefix
   # The list channels that have been endorsed by the user.
