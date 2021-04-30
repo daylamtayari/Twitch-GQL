@@ -3587,6 +3587,8 @@ type Channel {
   contentAttributes: [MultiviewContentAttribute!]
   # The channel's badge flair setting and assets that are available to eligible subscribers.
   creatorBadgeFlair: CreatorBadgeFlair
+  # Details about crowd chants in the channel.
+  crowdChants: CrowdChants
   # Fetch the requesting user's currently playing radio content.
   currentRadioTrack: RadioCurrentlyPlaying
   # Returns configurations for a dashboard view in different parts of Twitch, such as Stream Manager
@@ -3902,6 +3904,12 @@ type ChannelClipsSettings {
   creationRestrictionOptions: ChannelClipsCreationRestrictionOptions
   # Set whether or not users can create Clips on this channel.
   isClipsCreationEnabled: Boolean!
+}
+
+# Settings dictating how Crowd Chants are run on a channel.
+type ChannelCrowdChantSettings {
+  # Whether the channel is allowed to run Crowd Chants at all.
+  isEligible: Boolean!
 }
 
 # Data about a single configured Mosaic layout. This layout
@@ -7861,6 +7869,47 @@ type CreateContentTagsPayload {
   content: TaggedContent
 }
 
+# An error returned from the createCrowdChant mutation.
+type CreateCrowdChantError {
+  # Code describing the error.
+  code: CreateCrowdChantErrorCode!
+}
+
+# Possible error codes from the createCrowdChant mutation.
+enum CreateCrowdChantErrorCode {
+  # There is already an active chant on the channel. The chant must end before a new
+  # Crowd Chant can be created.
+  CHANT_ALREADY_ACTIVE
+  # The channel is currently not eligible for Crowd Chant participation.
+  NOT_ELIGIBLE
+  # The current user is not allowed to create a chant in this channel.
+  FORBIDDEN
+  # User attempted to create a Crowd Chant with restricted content.
+  AUTOMOD_FAILED
+  # The user's message contained a blocked phrase.
+  CHANNEL_SETTINGS
+  # The user's message was rejected for another reason- possibly intentionally hidden, such as IP block.
+  MESSAGE_REJECTED
+  # An unexpected error occurred.
+  UNKNOWN
+}
+
+# Input for creating a crowd chant in a channel.
+input CreateCrowdChantInput {
+  # The channel ID that the crowd chant is being created in.
+  channelID: ID!
+  # The body of the chant.
+  text: String!
+}
+
+# Payload for creating a crowd chant.
+type CreateCrowdChantPayload {
+  # If present, there was an error with the request.
+  error: CreateCrowdChantError
+  # The newly created chant.
+  chant: CrowdChant
+}
+
 # Error codes for issues that may occur when trying to create a
 # new Mosaic layout.
 enum CreateDashboardViewMosaicLayoutErrorCode {
@@ -8133,6 +8182,69 @@ type CreateExtensionZipUploadInfoPayload {
   error: CreateExtensionZipUploadInfoError
   # Url and UploadId for zip file.
   response: ExtensionZipUploadResponse
+}
+
+# Errors for creating follower emotes.
+type CreateFollowerEmoteError {
+  # The associated error code.
+  code: CreateFollowerEmoteErrorCode!
+}
+
+# Possible error codes returned for creating follower emotes.
+enum CreateFollowerEmoteErrorCode {
+  # The user cannot own any more emotes of this type.
+  USER_OWNED_EMOTE_LIMIT_REACHED
+  # Only the channel owner is allowed to upload follower emotes.
+  INVALID_OWNER
+  # The emote code submitted is unacceptable (contains offensive, banned, or "bad" words, which violates guidelines).
+  EMOTE_CODE_UNACCEPTABLE
+  # Data for least one of the image sizes is not provided or invalid.
+  INCOMPLETE_EMOTE_IMAGE_DATA
+  # The emote code suffix submitted contains invalid characters.
+  INVALID_CODE_SUFFIX
+  # The upload emote image could not be parsed.
+  INVALID_IMAGE_UPLOAD
+  # The uploaded emote image could not be found.
+  EMOTE_IMAGE_NOT_FOUND
+  # There were not enough image assets supplied for the selected asset type.
+  NOT_ENOUGH_EMOTE_IMAGE_ASSETS
+  # There were more image assets supplied than required for the selected asset type.
+  TOO_MANY_EMOTE_IMAGE_ASSETS
+  # The selected emote asset type was invalid.
+  INVALID_EMOTE_ASSET_TYPE
+  # The selected emote state was invalid.
+  INVALID_EMOTE_STATE
+  # There were more emote groups supplied than required for the emote state.
+  TOO_MANY_EMOTE_GROUPS
+  # A static image asset was not supplied, but is required for the selected asset type.
+  EMOTE_MISSING_STATIC_ASSET
+  # An animated image asset was not supplied, but is required for the selected asset type.
+  EMOTE_MISSING_ANIMATED_ASSET
+  # Other errors returned from the service.
+  UNKNOWN_ERROR
+}
+
+# The data needed to finalize the creation of a follower Emote.
+input CreateFollowerEmoteInput {
+  # The type of image asset for the emote.
+  assetType: EmoteAssetType
+  # The group IDs for the follower emote.  Should initially be an array of length
+  # 1, but could span multiple groups in the future.
+  groupIDs: [ID!]!
+  # The channel's emote prefix and the codeSuffix of the emote put together. This is how the emote is invoked in chat.
+  code: String!
+  # The custom suffix of the emote code. When appended to the channel's emote prefix this will form the full emote code.
+  codeSuffix: String!
+  # A list containing the image IDs for all assets needed for the emote.
+  imageAssets: [EmoteImageAssetInput!]!
+}
+
+# Results of the create follower emote publish.
+type CreateFollowerEmotePayload {
+  # The newly created emote if successful.
+  emote: Emote
+  # Service error, if any.
+  error: CreateFollowerEmoteError
 }
 
 input CreateFriendRequestInput {
@@ -9550,6 +9662,30 @@ enum CreditType {
   NO_CREDIT_TYPE
   # A sub token type.
   SUB_TOKEN
+}
+
+# A Crowd Chant on a channel.
+type CrowdChant {
+  # The timestamp of when the chant was created.
+  createdAt: Time!
+  # The creator of the chant.
+  createdBy: User!
+  # The timestamp of when the chant will end.
+  endsAt: Time!
+  # Unique identifier of the chant.
+  id: ID!
+  # The uuid of the chant's chat message sent on behalf of the user creating the chant.
+  chatMessageID: ID!
+  # The body of the chant.
+  text: String!
+}
+
+# Details about crowd chants in the channel.
+type CrowdChants {
+  # The channel's settings for crowd chants.
+  settings: ChannelCrowdChantSettings
+  # The channel's active chant.
+  activeChant: CrowdChant
 }
 
 # Possible values of actionPrompted in SubmitCSATFeedbackInput.
@@ -16951,6 +17087,8 @@ type Mutation {
   createCompetition(input: CreateCompetitionInput!): CreateCompetitionPayload
   # createContentTags creates the tags specified and associates it with the piece of content specified.
   createContentTags(input: CreateContentTagsInput!): CreateContentTagsPayload
+  # createCrowdChant creates a crowd chant on a channel.
+  createCrowdChant(input: CreateCrowdChantInput!): CreateCrowdChantPayload
   # createDropBenefit creates a benefit that can be used within a drop campaign.
   createDropBenefit(input: CreateDropBenefitInput!): CreateDropBenefitPayload
   # createDropCampaign creates a Drop Campaign owned by an organization.
@@ -16976,6 +17114,10 @@ type Mutation {
   createFriendRequest(
     input: CreateFriendRequestInput!
   ): CreateFriendRequestPayload
+  # createFollowerEmote creates an emote object to be used only on the given channel, by followers of that channel.
+  createFollowerEmote(
+    input: CreateFollowerEmoteInput!
+  ): CreateFollowerEmotePayload
   # createGameApplication creates an application request to add game to a certain organization.
   createGameApplication(
     input: CreateGameApplicationInput!
@@ -24800,6 +24942,8 @@ input SendCheerInput {
   shouldCheerAnyway: Boolean
   # targetID is the `User.id` of the channel to send the cheer to.
   targetID: ID!
+  # Optional field for Cheer 2.0 experiments.
+  imageID: ID
 }
 
 type SendCheerPayload {
@@ -33074,6 +33218,8 @@ type UserAccountHealth {
   # The list of Two factor Methods the user has registered with.
   # Empty list means the user does not have two factor.
   twoFactorMethods: [TwoFactorMethod!]!
+  # Whether the user's two factor account ID is associated to multiple twitch accounts.
+  isTwoFactorAccountShared: Boolean!
 }
 
 # The relationship between the user and Amazon.
