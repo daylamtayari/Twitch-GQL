@@ -57,6 +57,8 @@ enum AcceptProgramAgreementError {
   UNAUTHENTICATED
   # User does not have permission to agree to the program agreement for the targeted user.
   FORBIDDEN
+  # User does not have an invitation matching the program agreement signed.
+  NOT_FOUND
   # Version of the agreement provided in the input is not valid.
   INVALID_AGREEMENT_VERSION
   # An internal error has occurred.
