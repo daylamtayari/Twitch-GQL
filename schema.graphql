@@ -316,6 +316,10 @@ enum AddChannelBlockedTermError {
   NO_PERMISSIONS
   # Duration provided was invalid.
   DURATION_INVALID
+  # Term length is too short, and connot be enforced.
+  TERM_TOO_SHORT
+  # Encountered an unknown error.
+  UNKNOWN_ERROR
 }
 
 # AddChannelBlockedTermInput takes in the channel, phrases, and if the term should be editable by mods.
@@ -356,6 +360,10 @@ enum AddChannelPermittedTermError {
   NO_PERMISSIONS
   # Duration provided was invalid.
   DURATION_INVALID
+  # Term length is too short, and connot be enforced.
+  TERM_TOO_SHORT
+  # Encountered an unknown error.
+  UNKNOWN_ERROR
 }
 
 # AddChannelPermittedTermInput takes in the channel, phrases, and if the term should be editable by mods.
@@ -1290,14 +1298,33 @@ type AutoModCaughtMessage {
 
 # Reason why a message is flagged and/or rejected.
 enum AutoModCaughtMessageCategory {
-  # Message contained words that were aggressive.
+  # Invalid category.
+  INVALID
+  # Message contained words that were aggressive (old category).
   AGGRESSIVE
-  # Message contained identity details.
+  # Message contained identity details (old category).
   IDENTITY
-  # Message contained words that were vulgar.
+  # Message contained words that were vulgar (old category).
   PROFANITY
-  # Message contained words that were sexual.
+  # Message contained words that were sexual (old category).
   SEXUAL
+  # Message contained words that contains name-calling, insults, or antagonization (new category).
+  BULLYING
+  # Message demonstrating hatred or prejudice based on sexual identity, sexual
+  # orientation, gender identity, or gender expression (new category).
+  SEXUALITY_SEX_OR_GENDER
+  # Message demonstrating hatred or prejudice based on perceived or actual mental or physical abilities (new category).
+  DISABILITY
+  # Message demonstrating hatred or prejudice based on race, ethnicity, or religion (new category).
+  RACE_ETHNICITY_OR_RELIGION
+  # Message demonstrating hatred or prejudice against women, including sexual objectification (new category).
+  MISOGYNY
+  # Message that were threatening, inciting, or promoting violence or other harm (new category).
+  AGGRESSION
+  # Message contained words showing sexual acts, anatomy (new category).
+  SEX_BASED_TERMS
+  # Message contained words that were swearing (new category).
+  SWEARING
 }
 
 # Describes a flagged message's posting status.
@@ -2039,6 +2066,9 @@ type BitsProduct {
   self: BitsProductSelfEdge
   # The product type, which right now is only "purchase".
   type: BitsProductType!
+  # The list of currencies (ISO 4217 format) that can purchase this product.
+  # If empty, the product does not have currency restriction.
+  restrictedToCurrencies: [String!]!
 }
 
 # The type used when checking bits product eligibility for a user.
@@ -3999,6 +4029,8 @@ type ChannelHomePreferences {
   heroPreset: HeroPreset!
   # The type of streamer shelf to display.
   streamerShelfType: StreamerShelfType!
+  # A boolean that indicates whether the channel has disabled syncing for their stream schedule.
+  isStreamScheduleSyncDisabled: Boolean!
 }
 
 # The shelves that are shown on a channel's home page.
@@ -4630,6 +4662,14 @@ type CheckoutPriceSummary {
   total: Int!
 }
 
+# CheerImage is a channel-specific set of images for Cheer.
+type CheerImage {
+  # The Image ID is used instead of just the URL for verification.
+  id: ID!
+  # The url of the image (to preview before using).
+  url: String!
+}
+
 # CheerInfo is the channel-specific bits/cheer settings and current state.
 type CheerInfo {
   # Gets the list of available bits badges the user offers.
@@ -4656,6 +4696,8 @@ type CheerInfo {
   hashtags(first: Int = 10, after: String): BitsHashtagConnection
     @deprecated(reason: "Hashtags is no longer a supported feature.")
   id: ID!
+  # images is a channel-specifc set of images for Cheering.
+  images: [CheerImage]
   # leaderboard contains the top users by number of bits cheered for the channel.
   leaderboard(first: Int!): BitsLeaderboard
   # recentTimeoutMs is the remaining duration the recent message will be pinned for.
@@ -9439,12 +9481,28 @@ type CreatorHome {
 interface CreatorHomeCard {
   # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
   type: String!
+  # Optional error field with an error code.
+  error: CreatorHomeError
 }
 
 # Predefined clusters for creators.
 type CreatorHomeCluster {
   # Unique identifier for the cluster, i.e. "FAR_FROM_AFFILIATE".
   id: ID!
+}
+
+# Error object for per-card and per-panel errors.
+type CreatorHomeError {
+  # Code detailing what went wrong, used by frontend to handle displaying.
+  code: CreatorHomeErrorCode!
+}
+
+# Error codes for creator home content.
+enum CreatorHomeErrorCode {
+  # Invalid or unknown code.
+  UNKNOWN
+  # Downstream data source failed.
+  LOADER_FAILED
 }
 
 # Predefined panels containing dynamic cards.
@@ -12346,6 +12404,18 @@ type EmoteBitsBadgeTierSummarySelfEdge {
   numberOfBitsUntilUnlock: Int!
 }
 
+# The possible statuses a user can have for local emotes.
+enum EmoteDashboardStatus {
+  # Couldn't determine local emote status.
+  UNKNOWN
+  # User is not allow-listed to use local emotes.
+  NOT_ALLOWED
+  # User cannot upload local emotes.
+  NO_UPLOAD
+  # User is allowed to utilize local emotes.
+  ALLOWED
+}
+
 # The possible emote group asset types.
 enum EmoteGroupAssetType {
   # STATIC type groups only contain static emotes.
@@ -12699,6 +12769,8 @@ type EventNotificationSetting {
 type Experiment {
   # The selected promoted Stream for placement experiments.
   promotedStream(promoLocation: Int!): Stream
+  # Whether or not the user is authorized to utilize new emotes.
+  localEmoteDashboard: LocalEmoteDashboard
 }
 
 # Data about an inactive subscription to a broadcaster.
@@ -14459,6 +14531,8 @@ type GenerateSubscribersCSVPayload {
 type GenericCreatorHomeCard implements CreatorHomeCard {
   # The type of the card, i.e. "STAT_FOLLOWERS_CARD".
   type: String!
+  # Optional error field with an error code.
+  error: CreatorHomeError
 }
 
 # The input for getting upload config.
@@ -15331,6 +15405,8 @@ type InsightCreatorHomeCard implements CreatorHomeCard {
   # currentValue indicates where the creator is in regards to an insight.
   # i.e You have gained "12" new followers.
   currentValue: Float!
+  # Optional error field with an error code.
+  error: CreatorHomeError
 }
 
 # InstallExtensionError is wrapper for error associated with the installExtension mutation.
@@ -15485,6 +15561,16 @@ type Inventory {
   drops: UserDropAwardConnection
   # The drops awarded to this user via Drops 2.0 and triggered by broadcaster's game events.
   gameEventDrops: [UserDropReward]
+}
+
+# The invitation's type, relative to the channel's current onboarding status.
+enum InvitationType {
+  # The highest-valued, active invitation associated with the channel.
+  TOP
+  # The invitation which has been used or may be used to become monetized.
+  PAYOUT
+  # The invitation which may be used to upgrade the channel's current onboarding state.
+  UPGRADE
 }
 
 # IOSPaymentTrackingDataInput contains fields to pass in tracking data related to iOS payments.
@@ -15969,6 +16055,12 @@ enum LobbyState {
   DONE
   # Lobby state is unknown.
   UNKNOWN
+}
+
+# Represents the local emote dashboard.
+type LocalEmoteDashboard {
+  # The users status regarding local emotes.
+  status: EmoteDashboardStatus
 }
 
 # An error returned from the lockPredictionEvent mutation.
@@ -18685,6 +18777,14 @@ type Onboarding {
   ): [Stream] @deprecated(reason: "This feature has been sunset.")
   # List of channel IDs skipped by a user during onboarding.
   skippedChannelIDs: [ID!] @deprecated(reason: "This feature is retired")
+}
+
+# A user's invitations to onboard as a Twitch Creator or to upgrade their payout onboarding terms.
+type OnboardingInvitations {
+  # The user's Payout invitation. It is the invitation the user will use or has used to become monetized.
+  payout: PayoutInvite
+  # The user's Upgrade invitation. It is the invitation which may be used to upgrade the channel's current onboarding state.
+  upgrade: PayoutInvite
 }
 
 type OnsiteNotification {
@@ -26844,6 +26944,8 @@ type StatCreatorHomeCard implements CreatorHomeCard {
   # targetValue indicates the target for a given stat.
   # i.e Get "50" Followers, broadcaster has 19.
   targetValue: Float!
+  # Optional error field with an error code.
+  error: CreatorHomeError
 }
 
 # Error code for an error that occurs while stopping the bounty.
@@ -29955,6 +30057,8 @@ input UpdateChannelHomePreferencesInput {
   heroPreset: HeroPreset
   # The type of streamer shelf to display.
   streamerShelfType: StreamerShelfType
+  # A boolean that indicates whether the channel has disabled syncing for their stream schedule.
+  isStreamScheduleSyncDisabled: Boolean
 }
 
 # The result of an update to the category shelf.
@@ -32487,14 +32591,12 @@ type User {
   bitsOffers: [BitsOffer]
   # BitsPaymentMethods has a list of eligible payment methods for a user to transact with.
   bitsPaymentMethods: BitsPaymentMethods
-  # BitsProductEligibility checks for a given user if they are eligible to purchase a given product from the associated
-  # provider, quantity, and locale.
-  # bitsProduct(id: ID!, provider: BitsProductProvider!, quantity: Int!, locale: String!): BitsProductEligibility!
   # bitsProducts is a list of bits products that a user is able to purchase.
   # Unlike bitsOffers, this does not return any pricing information, only information
   # about the purchasable. A provider must be supplied, which is the payment platform
   # being currently used. An optional list of SKUs can be provided if we are looking up
-  # a specific set of products for a user.
+  # a specific set of products for a user. Locale may need to be supplied via "Accept-Language"
+  # header for certain providers.
   bitsProducts(
     provider: BitsProductProvider!
     skus: [String!]
@@ -32900,6 +33002,8 @@ type User {
   offlineImageURL: String
   # Information about the current user's onboarding state.
   onboarding: Onboarding @deprecated(reason: "This feature has been sunset.")
+  # A user's invitations to onboard as a Twitch Creator.
+  onboardingInvitations: OnboardingInvitations
   # List of invites to join an organization.
   organizationInvites(
     first: Int = 10
@@ -32960,7 +33064,7 @@ type User {
   payout: Payout
   # Accrued balance since last payout.
   payoutBalance: PayoutBalance
-  # A user's invite into a payout program.
+  # A user's invite into a payout program. Always represents the highest-level payout invitation.
   payoutInvite: PayoutInvite
   # List of payout plans a user has when enrolled in any payout programs.
   payoutPlans: [PayoutPlan!]
@@ -33007,7 +33111,7 @@ type User {
   # The number of views this user's profile has received since creation.
   profileViewCount: Int
   # The program agreement for a user enrolled in a payout program.
-  programAgreement: ProgramAgreement
+  programAgreement(invitationType: InvitationType = TOP): ProgramAgreement
   # A user's pulse feed.
   # This is only returned if the request is authenticated by the same user whose email is requested.
   pulseFeed: Feed
