@@ -14226,6 +14226,11 @@ type Game implements Directory {
   esrbDescriptions: [String!]
   # A list of extension recommendations, according to the game.
   extensionRecommendations: [ExtensionRecommendation!]
+  # A list of upcoming scheduled streams for this game.
+  upcomingStreams(
+    first: Int = 10
+    utcOffsetMinutes: Int = 0
+  ): GameUpcomingStreamConnection
   # Number of users that follow this game.
   followersCount: Int
   # The franchises the game belongs to.
@@ -14418,6 +14423,12 @@ input GameStreamOptions {
   sort: StreamSort = VIEWER_COUNT
   # The tags param are an array of tag ID as optional filters for streams.
   tags: [String!]
+}
+
+# The upcoming streams for a game.
+type GameUpcomingStreamConnection {
+  # The upcoming schedule segments.
+  nodes: [ScheduleSegment!]!
 }
 
 # GDPR Consent contains user consent on different tracking vendors.
@@ -21365,7 +21376,7 @@ type Query {
   # Gets a list of Bits offers for a logged out user, for use on the Bits landing page.
   bitsOffers: [BitsOffer!]
   # Returns a challenge by its ID.
-  challenge(id: ID!): ChannelChallenge
+  challenge(id: ID!): ChannelChallenge @deprecated
   # Get a list of the most recent changelog items.
   changelogEntries(limit: Int = 15): [ChangelogEntry!]
   # Get a channel by ID or name.
@@ -24537,6 +24548,8 @@ type ScheduleSegment {
   cancelledUntil: Time
   # The game categories tied to this segment.
   categories: [Game!]
+  # The channel the segment belongs to.
+  channel: Channel
   # The end time of the segment.
   endAt: Time
   # The start date and time of the first occurrence of the segment.
@@ -32526,7 +32539,7 @@ type User {
     after: Cursor
     sort: ChannelChallengeSort = START_TIME
     direction: SortOrder = DESC
-  ): ChannelChallengeConnection
+  ): ChannelChallengeConnection @deprecated
   # An action that a user or session is performing. This field is null if the user is not friends with
   # the authenticated user.
   activity: Activity
@@ -33033,7 +33046,7 @@ type User {
     sort: ChannelChallengeSort = END_TIME
     direction: SortOrder = ASC
     status: [ChannelChallengeStatus!]
-  ): ChannelChallengeConnection
+  ): ChannelChallengeConnection @deprecated
   # Non-partnered users can submit a partnership application via createPartnershipApplication mutation.
   # PartnershipApplication includes the status of the most recently submitted application.
   partnershipApplication: PartnershipApplication
@@ -35398,6 +35411,8 @@ type Xsolla {
   isSandbox: Boolean!
   # Access token to allow purchase checkout. This can be an empty string if the token cannot be generated.
   token: String!
+  # Reason why the user is ineligible to purchase.
+  ineligibilityReason: XsollaIneligibilityReason
 }
 
 type XsollaConfigs {
@@ -35411,6 +35426,14 @@ type XsollaConfigs {
   token: String!
   # Indicates if the token is for Xsolla's sandbox environment.
   isSandbox: Boolean!
+}
+
+# Reason for ineligibility for Xsolla purchase.
+enum XsollaIneligibilityReason {
+  # Unknown ineligibility reason.
+  UNKNOWN
+  # Indicates we should block the purchase outright.
+  BLOCK_PURCHASE
 }
 
 type ZuoraConfigs {
