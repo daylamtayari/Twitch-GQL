@@ -10696,6 +10696,9 @@ input DeleteChannelBlockedTermByIDInput {
   channelID: ID!
   # id of the term to be deleted.
   id: ID!
+  # isPrivateAction is whether or not the Delete action should be reflected in Mod
+  # Actions. Only channel owners can mark their term deletions as private.
+  isPrivateAction: Boolean = false
 }
 
 # The returned payload from the mutation.
@@ -28098,12 +28101,6 @@ type SubscriptionProductSelfConnection {
   checkoutConfiguration(
     config: CheckoutConfigurationInput!
   ): SubscriptionCheckoutConfigs
-  # The subscription's discount type (e.g. "percent_off").
-  discountType: DiscountType!
-    @deprecated(reason: "Transitioning to promotion field instead")
-  # The discount value of the subscription product (e.g. "50").
-  discountValue: String!
-    @deprecated(reason: "Transitioning to promotion field instead")
   # A list of GiftOffers that are available on this subscription product
   # depending on which platform, giftType and user that is authenticated.
   # Exposed on the self connection as well since user based promotions can be given in the future
@@ -28112,15 +28109,6 @@ type SubscriptionProductSelfConnection {
     platform: SubscriptionGiftOfferPlatform
     type: SubscriptionGiftType!
   ): [SubscriptionGiftOffer!]
-  # If the product is eligible for a discount.
-  isEligibleForDiscount: Boolean!
-    @deprecated(reason: "Transitioning to promotion field instead")
-  # The subscription's USD-formatted price after discount (e.g. "$2.49").
-  newPrice: String!
-    @deprecated(reason: "Transitioning to promotion field instead")
-  # The subscription's USD-formatted price before discount (e.g. "$4.99").
-  oldPrice: String!
-    @deprecated(reason: "Transitioning to promotion field instead")
   # If the subscription product is eligible for a paid upgrade promotion.
   paidUpgradePromotion: SubscriptionPromotion
   # Contains information on the final checkout price of this subscription product.
