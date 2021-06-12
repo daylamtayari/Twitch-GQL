@@ -1811,7 +1811,7 @@ type BitsBundleOffer implements BitsOffer {
   type: BitsOfferType!
   # url is the purchase URL to use for this offer.
   # The url contains a `{channelID}
-` token which should be replaced by the
+  # token which should be replaced by the
   # `User.id` of the channel bits are being purchased from.
   url: String!
 }
@@ -5570,9 +5570,7 @@ type Collection {
   owner: User
   # The thumbnailURL for the collection.
   # If either `height` or `width` are not given, a templated value (i.e.
-  # `{height}
-`, `{width}
-`) will be present in the URL instead.
+  # `{height}`, `{width}`) will be present in the URL instead.
   thumbnailURL(height: Int, width: Int): String
   # The user-supplied title of the collection.
   title: String!
@@ -11591,9 +11589,7 @@ interface Directory {
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   avatarURL(width: Int, height: Int): String
   # Number of broadcasters currently broadcasting in this directory.
   broadcastersCount: Int
@@ -11601,9 +11597,7 @@ interface Directory {
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   coverURL(width: Int, height: Int): String
   # The type of directory – community or game.
   directoryType: DirectoryType
@@ -14195,17 +14189,13 @@ type Game implements Directory {
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   avatarURL(width: Int, height: Int): String
   # URL to a box art image.
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   boxArtURL(width: Int, height: Int): String
   # Number of broadcasters streaming this game.
   broadcastersCount: Int
@@ -14265,9 +14255,7 @@ type Game implements Directory {
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   logoURL(width: Int, height: Int): String
   # The name of the game. This string is untranslated.
   # This field should only be used in limited occassions, like tracking and URLs.
@@ -14288,7 +14276,7 @@ type Game implements Directory {
   # Get a page of live streams broadcasting this game.
   # The languages param can be used to filter the streams. Otherwise all languages will be returned.
   # The filters param contains additional metadata filters, for example {hearthstoneGameMode: "arena"}
-.
+
   # The sort param can be used to change the default sorting, which sometimes is specific to specific games.
   # The tags param are an array of tag ID as optional filters for streams.
   # DEPRECATED field arguments: languages, requestID, sort, tags
@@ -24846,9 +24834,7 @@ type SearchSuggestionCategory {
   #
   # The image dimensions are specifiable via the `height` and `width` parameters.
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   boxArtURL(width: Int, height: Int): String!
   # The category.
   game: Game
@@ -34199,9 +34185,7 @@ type Video {
   playbackAccessToken(params: PlaybackAccessTokenParams!): PlaybackAccessToken
   # The URL to the thumbnail which should be displayed for the video.
   # If either `height` or `width` are not given, a templated value (i.e.
-  # `{height}
-`, `{width}
-`) will be present in the URL instead.
+  # `{height}`, `{width}`) will be present in the URL instead.
   previewThumbnailURL(height: Int, width: Int): String!
   # The time when the archive/highlight/upload was first ever available to public,
   # even if it is not currently public.
@@ -34241,9 +34225,7 @@ type Video {
   # A list of thumbnail URLs for the video, ordered by descending priority.
   # Owners can insert custom thumbnails into this list.
   # If either `height` or `width` are not given, a templated value (i.e.
-  # `{height}
-`, `{width}
-`) will be present in the URL instead.
+  # `{height}`, `{width}`) will be present in the URL instead.
   thumbnailURLs(height: Int, width: Int): [String]
   # The title of the video.
   title: String
