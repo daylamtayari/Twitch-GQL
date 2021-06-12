@@ -14212,9 +14212,7 @@ type Game implements Directory {
   # The image dimensions are specifiable via the `height` and `width` parameters.
   #
   # If `height` or `width` are not specified, the URL will contain
-  # the template strings `{height}
-` and/or `{width}
-` in their respective places.
+  # the template strings `{height}` and/or `{width}` in their respective places.
   coverURL(width: Int, height: Int): String
   # The game's description.
   description: String
